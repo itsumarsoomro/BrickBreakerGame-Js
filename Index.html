@@ -1,0 +1,165 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8" />
+    <title>Marble Shooter</title>
+    <link rel="stylesheet" href="StyleSheet.css" />
+</head>
+<body>
+
+    <!-- Connecting Js sprite files -->
+    <script src="Sprites/ship.js"></script>
+    <script src="Sprites/blocks.js"></script>
+    <script src="Sprites/ball.js"></script>
+    
+    <!-- Connecting Js classes files -->
+    <script src="Classes/keycode.js"></script>
+    <script src="Classes/vector.js"></script>
+    <script src="Classes/accelration.js"></script>
+    <script src="Classes/collision.js"></script>
+    <script src="Classes/collection.js"></script>
+
+    <!-- Creating canvas by inline css -->
+    <canvas id="canvas" width="600" height="450" style="background-color: cyan; border-color: Black;"></canvas>
+
+    <script>
+
+        //this function will always be executed when the page loads
+        window.onload = function () {
+
+            //create a reference to the canvas
+            var canvas = document.getElementById('canvas'),
+
+                //access the 2D drawing API
+                context = canvas.getContext('2d'),
+
+                //new instance of the Ship class
+                ship = new Ship();
+            //new instance of the Block class
+            block = new Block();
+            //new instance of the Balls class
+            balls = new Balls();
+
+            //create the block collection
+            var blocks = new Collection(),
+                //set the number of  blocks to display
+                blockCount = 15;
+            function InitBlock() {
+                var row = 10,
+                    rowCount = 0,
+                    y = 10;
+                while (rowCount < row) {
+                    for (var count = 0; count < blockCount; count++) {
+                        x = count * 40;
+                        block = new Block(x + 20, y);
+                        blocks.add(block);
+
+                    }
+                                
+                    rowCount++;
+                    y += 20;
+                }
+           
+            }
+                InitBlock();
+    
+            //create a new instance of the vector class
+            vectorLeft = new Vector(180, 3),
+                vectorRight = new Vector(0, 3),
+                vectorFire = new Vector(270, 5),
+
+                //create a new acceleration object
+                acceleration = new Accelerate(0);
+
+            //create a new instance of the collision detection class
+            collision = new Collision();
+
+            //function to handle keyboard events
+            function KeyboardEventHandler(event) {
+                       
+                //if the left arrow is pressed
+                if (event.keyCode == keycode.LEFT) {
+                    ship.setVector(vectorLeft);
+                    balls.setVector(vectorLeft);
+                }
+
+                //if the right arrow is pressed
+                if (event.keyCode == keycode.RIGHT) {
+                    ship.setVector(vectorRight);
+                    balls.setVector(vectorRight);
+                }
+                 
+                // if the space bar is pressed
+                if (event.keyCode == keycode.SPACE) {
+                    console.log("space bar is pressed");
+                    balls.setVector(vectorFire);
+                }
+
+            }
+
+
+            //halt the ship movement when arrow is released
+            function HaltShip(event) {
+                if (event.keyCode == keycode.LEFT || event.keyCode == keycode.RIGHT) {
+                    ship.halt();
+                }
+            }
+
+            //halt the ball movement when arrow is released
+            function HaltBalls(event) {
+                if (event.keyCode == keycode.LEFT || event.keyCode == keycode.RIGHT) {
+                    balls.halt();
+                }
+            }
+
+           // function for bock collection
+            function DrawBlocks() {
+                for (var count = 0; count < blocks.count; count++) {
+                    blocks.item(count).draw(context);
+                }
+            }
+
+
+            //add a listener for the keydown event
+            window.addEventListener('keydown', KeyboardEventHandler, false);
+
+            //add a listener for the keyup event to halt ship
+            window.addEventListener('keyup', HaltShip, false);
+
+            //add a listener for the keyup event to halt balls
+            window.addEventListener('keyup', HaltBalls, false);
+
+            (function drawFrame() {
+                //clear the canvas for the new frame
+                context.clearRect(0, 0, canvas.width, canvas.height);
+                //draw the ship
+                ship.draw(context);
+                //draw the block
+                block.draw(context);
+                //draw the balls
+                balls.draw(context);
+                //draw the collection blocks
+                DrawBlocks();
+
+                //get the ship move
+                ship.move();
+                //get the ship move
+                balls.move();
+
+                //apply the acceleration to the ship
+                ship.accelerate(acceleration);
+                //get the next animation frame
+                window.requestAnimationFrame(drawFrame);
+
+                //check to see if there is a collision or not
+                if (collision.Overlapping(balls, block)) {
+                    //alert that a collision has taken place
+                    alert("collision");
+                }
+
+            })();
+        }
+    </script>
+
+</body>
+</html>
